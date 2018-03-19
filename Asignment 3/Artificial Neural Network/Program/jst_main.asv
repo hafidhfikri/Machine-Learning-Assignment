@@ -1,0 +1,51 @@
+clc;
+clear;
+
+dataset = csvread('Compound.csv');
+scatter(dataset(:,1),dataset(:,2),10,dataset(:,3));
+
+P = dataset (:,1:2); %input
+T = dataset (:,3); %output
+
+%convert output
+x = size(T,1);
+Ta = T;
+for i=1:x
+    if T(i) == 1
+        T(i) = 0.08335;
+    elseif T(i) == 2
+        T(i) = 0.25005;
+    elseif T(i) == 3
+        T(i) = 0.41625;
+    elseif T(i) == 4
+        T(i) = 0.58345;
+    elseif T(i) == 5
+        T(i) = 0.75025;
+    elseif T(i) == 6
+        T(i) = 0.91685;
+    end
+end
+
+epoch = 100;
+lr = 0.01;
+in = 2; %jumlah layer input
+hidden = 12; %jumlah hidden input
+out = 1; %jumlah layer output
+
+[W1 b1 W2 b2 TotMSE] = ProsesLatih(P,T,lr,in,hidden,out,epoch);
+
+plot(TotMSE);
+
+[akurasi Th] = ProsesTest(P,Ta,W1,W2,b1,b2);
+
+%bagian analisis
+%cari confusion matrix
+tblCM = zeros([7 4]);
+for i = 1:7
+    [tp tn fp fn]  = ConfMat(i,Th(:),Th);
+    tblCM(i,:) = [tp tn fp fn] ;
+end
+
+[F1MicAvg F1MacAvg Accuracy] = F1AndAccFunction(tblCM);
+
+disp(['F1 Micro Average dari dataset diatas adalah ' num2str(F1MicAvg*100) '%']);

@@ -1,0 +1,54 @@
+clc;
+clear;
+
+dataset = csvread('Compound.csv');
+scatter(dataset(:,1),dataset(:,2),10,dataset(:,3));
+
+P = dataset (:,1:2); %input
+T = dataset (:,3); %output
+
+epoch = 01000;
+lr = 0.5;
+in = 2;
+hidden = 10;
+out = 1;
+W1 = rand(in,hidden);
+b1 = rand(1,hidden);
+W2 = rand(hidden,out);
+b2 = rand(1,out);
+nRow = size(P,1);
+TotMSE = [];
+
+for j=1:epoch
+    TotEr = [];
+    j
+    for i = 1:nRow
+        %forward
+        v= W1'*P(i,:)'+b1';
+        A1 = 1/(1+exp(-v));
+        v2 = W2'*A1'+b2; 
+        A2 = 1/(1+exp(-v2));
+        E = T(i)-A2;
+        TotEr = [TotEr E];
+        
+        %backward
+        D2 = A2*(1-A2)*E;
+        D1 = A1*(1-A1)'*(W2*D2);
+        dW1 = lr*D1*P(i,:);
+        dW2 = lr*D2*A1;
+        db1 = lr*D1;
+        db2 = lr*D2;
+        
+%         perbaikan bobot
+        W1 = W1+dW1';
+        W2 = W2+dW2';
+        
+%         perbaikan bias
+        b1 = b1+db1';
+        b2 = b2+db2';
+    end
+    MSE = mean(TotEr.^2);
+    TotMSE = [TotMSE MSE];
+end
+
+plot(TotMSE)
